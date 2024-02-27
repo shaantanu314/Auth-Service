@@ -12,7 +12,11 @@ const {
 } = require("../../db/schemas/refreshTokenSchema");
 const db = require("../../db");
 
-const { hasRefreshTokenExpired, getRefreshToken } = require("./helpers");
+const {
+  hasRefreshTokenExpired,
+  getRefreshToken,
+  getUserPermissions,
+} = require("./helpers");
 
 const config = require("../../config");
 
@@ -36,14 +40,17 @@ const signin = async (req, res, next) => {
       throw new APIError(400, "Invalid Credentials");
     }
 
-    const shouldAuthenticate = await bcrypt.compare(
+    const should_authenticate = await bcrypt.compare(
       user_password,
       user.user_password
     );
 
-    if (!shouldAuthenticate) {
+    if (!should_authenticate) {
       throw new APIError(400, "Invalid Credentials");
     }
+
+    // get user permissions
+    const user_permissions = await getUserPermissions(user.user_id);
 
     // Create a refresh token
     const refreshToken = crypto.randomBytes(64).toString("base64");
@@ -58,6 +65,7 @@ const signin = async (req, res, next) => {
     // Create an access token
     const accessToken = signToken({
       user,
+      user_permissions,
       expires_at: new Date().getTime() + config.access_token_expiry_time,
     }); // Todo: add user roles here
 

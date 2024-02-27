@@ -4,7 +4,7 @@ const {
   varchar,
   timestamp,
 } = require("drizzle-orm/mysql-core");
-const { sql, relations } = require("drizzle-orm");
+const { sql } = require("drizzle-orm");
 
 const { users } = require("../userSchema");
 

@@ -14,7 +14,7 @@ const refreshToken = mysqlTable("RefreshToken", {
     .notNull()
     .references(() => users.user_id),
   token: varchar("token", { length: 255 }).notNull(),
-  expires_at: timestamp("created_at").notNull(),
+  expires_at: timestamp("expires_at").notNull(),
   created_at: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 

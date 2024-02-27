@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
-const { eq } = require("drizzle-orm");
+const { eq, and, lt } = require("drizzle-orm");
 const _omit = require("lodash/omit");
+const crypto = require("crypto");
 
 const APIError = require("../../utils/APIError");
 const { signToken } = require("../../utils/jwt");
@@ -11,10 +12,20 @@ const {
 } = require("../../db/schemas/refreshTokenSchema");
 const db = require("../../db");
 
+const { hasRefreshTokenExpired, getRefreshToken } = require("./helpers");
+
 const config = require("../../config");
 
 const signin = async (req, res, next) => {
   try {
+    const refreshTokenCookie = getRefreshToken(req),
+      hasExpired = await hasRefreshTokenExpired(refreshTokenCookie);
+
+    // In case the token has not expired
+    if (refreshTokenCookie && !hasExpired) {
+      throw new APIError(400, "User already signed in");
+    }
+
     const { user_email, user_password } = req.body;
 
     const user = (
@@ -34,18 +45,24 @@ const signin = async (req, res, next) => {
       throw new APIError(400, "Invalid Credentials");
     }
 
-    const accessToken = signToken({ user }); // Todo: add user roles here
-
-    const refreshToken = "refresh token";
-    const expires_at = new Date().getTime() + config.refresh_token_expiry_time; // Todo: fix this
+    // Create a refresh token
+    const refreshToken = crypto.randomBytes(64).toString("base64");
+    const expires_at = new Date().getTime() + config.refresh_token_expiry_time;
 
     await db.insert(refreshTokenSchema).values({
       user_id: user.user_id,
       token: refreshToken,
-      expires_at,
+      expires_at: new Date(expires_at),
     });
 
-    res.cookie("refreshToken", refreshToken, {
+    // Create an access token
+    const accessToken = signToken({
+      user,
+      expires_at: new Date().getTime() + config.access_token_expiry_time,
+    }); // Todo: add user roles here
+
+    // set the cookie with the response
+    res.cookie("dfs-auth-refresh-token", refreshToken, {
       secure: true,
       httpOnly: true,
       sameSite: "strict",
@@ -61,7 +78,6 @@ const signin = async (req, res, next) => {
       error: false,
     });
   } catch (err) {
-    console.log(err);
     return next(err);
   }
 };

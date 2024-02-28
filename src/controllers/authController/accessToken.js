@@ -1,22 +1,12 @@
-const { eq, and } = require("drizzle-orm");
 const _omit = require("lodash/omit");
 
 const APIError = require("../../utils/APIError");
 
 const {
-  refreshToken: refreshTokenSchema,
-} = require("../../db/schemas/refreshTokenSchema");
-const { users } = require("../../db/schemas/userSchema");
-const db = require("../../db");
-
-const {
   hasRefreshTokenExpired,
   getRefreshToken,
-  getUserPermissions,
+  generateAccessToken,
 } = require("./helpers");
-const { signToken } = require("../../utils/jwt");
-
-const config = require("../../config");
 
 const getAccessToken = async (req, res, next) => {
   try {
@@ -24,31 +14,10 @@ const getAccessToken = async (req, res, next) => {
       hasExpired = await hasRefreshTokenExpired(refreshTokenCookie);
 
     if (!refreshTokenCookie || hasExpired) {
-      throw new APIError(401, "Token Expired");
+      throw new APIError(401, "Unauthorized Access");
     }
 
-    const user = (
-      await db
-        .select({ ...users })
-        .from(users)
-        .innerJoin(
-          refreshTokenSchema,
-          and(
-            eq(users.user_id, refreshTokenSchema.user_id),
-            eq(refreshTokenSchema.token, refreshTokenCookie)
-          )
-        )
-    )?.[0];
-
-    // get user permissions
-    const user_permissions = await getUserPermissions(user.user_id);
-
-    // Create an access token
-    const accessToken = signToken({
-      user,
-      user_permissions,
-      expires_at: new Date().getTime() + config.access_token_expiry_time,
-    }); // Todo: add user roles here
+    const { user, accessToken } = await generateAccessToken(refreshTokenCookie);
 
     res.status(200).send({
       data: {
@@ -59,6 +28,7 @@ const getAccessToken = async (req, res, next) => {
       error: false,
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };

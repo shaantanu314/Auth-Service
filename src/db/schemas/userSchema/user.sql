@@ -1,3 +1,5 @@
+-- SET foreign_key_checks = 0;
+
 DROP TABLE IF EXISTS Users;
 
 CREATE TABLE Users (
@@ -16,3 +18,4 @@ CREATE TABLE Users (
     PRIMARY KEY (user_id)
 );
 
+-- SET foreign_key_checks = 1;

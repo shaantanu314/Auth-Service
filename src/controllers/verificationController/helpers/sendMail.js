@@ -14,7 +14,7 @@ OAuth2_client.setCredentials({
   refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
 });
 
-const sendMail = async (user, otp) => {
+const sendMail = async (mail_params, mail_template) => {
   const access_token = OAuth2_client.getAccessToken();
   const transport = nodemailer.createTransport({
     service: "gmail",
@@ -30,9 +30,9 @@ const sendMail = async (user, otp) => {
 
   const mail_options = {
     from: "DFS Admin",
-    to: user.user_email,
+    to: mail_params.user.user_email,
     subject: "Email Verification Request",
-    html: getMailHTML(user, otp),
+    html: getMailHTML(mail_params, mail_template),
   };
 
   return transport.sendMail(mail_options);

@@ -11,4 +11,10 @@ router.get(
   verificationController.generateVerificationCode
 );
 
+router.post(
+  "/verify-email",
+  authenticateUser,
+  verificationController.verifyEmail
+);
+
 module.exports = router;

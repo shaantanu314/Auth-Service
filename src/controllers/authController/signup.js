@@ -3,9 +3,12 @@ const { eq } = require("drizzle-orm");
 const _omit = require("lodash/omit");
 
 const { users } = require("../../db/schemas/userSchema");
+const { userPermissions } = require("../../db/schemas/rolesSchema");
 const db = require("../../db");
 
 const config = require("../../config");
+
+const USER_ROLE = 4;
 
 const signup = async (req, res, next) => {
   try {
@@ -39,6 +42,11 @@ const signup = async (req, res, next) => {
       })
       .then(async (res) => {
         const user_id = res[0].insertId;
+
+        await db.insert(userPermissions).values({
+          user_id,
+          role_id: USER_ROLE,
+        });
 
         return (
           await db.select().from(users).where(eq(users.user_id, user_id))

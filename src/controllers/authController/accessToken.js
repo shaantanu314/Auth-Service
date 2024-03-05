@@ -6,6 +6,7 @@ const {
   hasRefreshTokenExpired,
   getRefreshToken,
   generateAccessToken,
+  getUserPermissions,
 } = require("./helpers");
 
 const getAccessToken = async (req, res, next) => {
@@ -19,9 +20,13 @@ const getAccessToken = async (req, res, next) => {
 
     const { user, accessToken } = await generateAccessToken(refreshTokenCookie);
 
+    // get user permissions
+    const user_permissions = await getUserPermissions(user.user_id);
+
     res.status(200).send({
       data: {
         user: _omit(user, ["user_password", "created_at"]),
+        user_permissions,
         accessToken,
       },
       message: "new access token generated",

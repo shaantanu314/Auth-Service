@@ -66,7 +66,7 @@ CREATE DATABASE DFSAuth;
 
 # Create a user specific for this project and grant all permissions on this newly created database
 CREATE USER 'dfs-auth'@'localhost' IDENTIFIED  BY 'password';
-GRANT PRIVILEGE ON DFSAuth.* TO 'dfs-auth'@'localhost';
+GRANT ALL PRIVILEGES ON DFSAuth.* TO 'dfs-auth'@'localhost';
 ```
 
 Setup Tables

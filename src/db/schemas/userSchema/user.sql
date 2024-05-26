@@ -1,4 +1,4 @@
--- SET foreign_key_checks = 0;
+ SET foreign_key_checks = 0;
 
 DROP TABLE IF EXISTS Users;
 
@@ -9,8 +9,8 @@ CREATE TABLE Users (
     first_name text NOT NULL,
     last_name text NOT NULL,
     username varchar(63) NOT NULL UNIQUE,
-    institution varchar(63) DEFAULT "",
-    designation varchar(63) DEFAULT "user",
+    institution varchar(255) DEFAULT "",
+    designation varchar(255) DEFAULT "user",
     user_profile_url varchar(255) DEFAULT "",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_details_json json,
@@ -18,4 +18,4 @@ CREATE TABLE Users (
     PRIMARY KEY (user_id)
 );
 
--- SET foreign_key_checks = 1;
+ SET foreign_key_checks = 1;

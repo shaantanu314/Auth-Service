@@ -18,8 +18,8 @@ const users = mysqlTable("Users", {
   username: varchar("username", { length: 63 }).notNull().unique(),
   user_password: varchar("user_password", { length: 255 }).notNull(),
   // fields below this have default values
-  institution: varchar("institution", { length: 63 }).default(""),
-  designation: varchar("designation", { length: 63 }).default("user"),
+  institution: varchar("institution", { length: 255 }).default(""),
+  designation: varchar("designation", { length: 255 }).default("user"),
   user_profile_url: varchar("user_profile_url", { length: 255 }).default(""),
   user_details_json: json("user_details_json"),
   verified: boolean("verified").default(false), // to be modified only by auth server after email verification
